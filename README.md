@@ -35,13 +35,9 @@ This repository contains the **Frontend (Client App)**, built to provide a moder
 
 ## 📸 Screenshots
 
-> **Note:** Screenshots are currently placeholders. Please add your images to the `public/screenshots/` folder.
-
 | Home / Marketplace | Dashboard | Mobile / PWA View |
 |:---:|:---:|:---:|
-| ![Home Placeholder](/screenshots/home.png) | ![Dashboard Placeholder](/screenshots/dashboard.png) | ![Mobile Placeholder](/screenshots/mobile.png) |
-
-*(If images are broken, it means they need to be uploaded to the repository).*
+| ![Home](public/screenshots/home.png) | ![Dashboard](public/screenshots/dashboard.png) | ![Mobile](public/screenshots/mobile.png) |
 
 ---
 
