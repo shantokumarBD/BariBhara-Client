@@ -188,7 +188,3 @@ npm run build
 - **Live Demo:** [https://baribhara.vercel.app/](https://baribhara.vercel.app/)
 
 ---
-
-<div align="center">
-  <sub>Built with ❤️ by the BariBhara Team</sub>
-</div>
