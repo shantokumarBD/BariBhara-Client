@@ -144,8 +144,8 @@ export const useTenant = (page = 1, limit = 9) => {
 
   // ১০. NID ভেরিফিকেশন
   const verifyNidMutation = useMutation({
-    mutationFn: ({ id, verified }: { id: string; verified: boolean }) =>
-      verifyNidApi(id, verified),
+    mutationFn: ({ id, verified, status, rejectionReason }: { id: string; verified?: boolean; status?: string; rejectionReason?: string }) =>
+      verifyNidApi(id, verified !== undefined ? verified : status === "approved"),
     onSuccess: (res: any) => {
       toast.success(res?.message || "NID স্ট্যাটাস আপডেট হয়েছে!");
       queryClient.invalidateQueries({ queryKey: ["tenants"] });
@@ -157,8 +157,8 @@ export const useTenant = (page = 1, limit = 9) => {
 
   // ১১. ইউটিলিটি চার্জেস
   const updateUtilitiesMutation = useMutation({
-    mutationFn: ({ id, utilities }: { id: string; utilities: any }) =>
-      updateUtilitiesApi(id, utilities),
+    mutationFn: ({ id, utilities, utilityConfig }: { id: string; utilities?: any; utilityConfig?: any }) =>
+      updateUtilitiesApi(id, utilities || utilityConfig),
     onSuccess: (res: any) => {
       toast.success(res?.message || "ইউটিলিটি চার্জেস সেভ হয়েছে!");
       queryClient.invalidateQueries({ queryKey: ["tenants"] });
@@ -170,8 +170,8 @@ export const useTenant = (page = 1, limit = 9) => {
 
   // ১২. রেটিং দেওয়া
   const rateTenantMutation = useMutation({
-    mutationFn: ({ id, rating, review }: { id: string; rating: number; review?: string }) =>
-      rateTenantApi(id, rating, review),
+    mutationFn: ({ id, rating, review, ratingData }: { id: string; rating?: number; review?: string; ratingData?: any }) =>
+      rateTenantApi(id, rating ?? ratingData?.rating ?? 5, review ?? ratingData?.review),
     onSuccess: (res: any) => {
       toast.success(res?.message || "রেটিং সফলভাবে জমা হয়েছে!");
       queryClient.invalidateQueries({ queryKey: ["tenants"] });

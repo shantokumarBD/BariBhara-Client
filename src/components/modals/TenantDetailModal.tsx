@@ -71,7 +71,7 @@ const TenantDetailModal = ({ isOpen, onClose, unitId }: TenantDetailModalProps) 
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-slate-800">{tenant.name}</h3>
-                  <span className={`px-3 py-1 text-[10px] font-black rounded-full uppercase ${tenant.status === "সক্রিয়" ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-500"}`}>
+                  <span className={`px-3 py-1 text-[10px] font-black rounded-full uppercase ${((tenant.status as string) === "সক্রিয়" || tenant.status === "active") ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-500"}`}>
                     {tenant.status}
                   </span>
                 </div>
@@ -82,12 +82,12 @@ const TenantDetailModal = ({ isOpen, onClose, unitId }: TenantDetailModalProps) 
                 <InfoRow icon={<Phone size={15} />} label="ফোন নম্বর" value={tenant.phone} />
                 {tenant.nid && <InfoRow icon={<IdCard size={15} />} label="NID নম্বর" value={tenant.nid} />}
                 <InfoRow icon={<CreditCard size={15} />} label="মাসিক ভাড়া" value={`৳ ${tenant.rentAmount?.toLocaleString()}`} highlight />
-                {tenant.advanceAmount > 0 && (
+                {(tenant.advanceAmount || 0) > 0 && (
                   <InfoRow icon={<CreditCard size={15} />} label="অগ্রিম প্রদত্ত" value={`৳ ${tenant.advanceAmount?.toLocaleString()}`} />
                 )}
-                <InfoRow icon={<Calendar size={15} />} label="ভাড়া শুরু" value={formatDate(tenant.leaseStart)} />
-                {tenant.leaseEnd && (
-                  <InfoRow icon={<Calendar size={15} />} label="লিজ শেষ" value={formatDate(tenant.leaseEnd)} />
+                <InfoRow icon={<Calendar size={15} />} label="ভাড়া শুরু" value={formatDate(tenant.leaseStartDate || (tenant as any).leaseStart)} />
+                {(tenant.leaseEndDate || (tenant as any).leaseEnd) && (
+                  <InfoRow icon={<Calendar size={15} />} label="লিজ শেষ" value={formatDate(tenant.leaseEndDate || (tenant as any).leaseEnd)} />
                 )}
               </div>
 
