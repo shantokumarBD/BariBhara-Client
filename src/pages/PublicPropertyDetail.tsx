@@ -5,12 +5,14 @@ import axios from "axios";
 import {
   MapPin, Phone, Mail, Building2, CheckCircle2, ChevronLeft,
   Loader2, Home, BedDouble, Layers, ArrowRight, Shield, Star, Heart, ImageOff,
-  LayoutGrid, Utensils, Flame
+  LayoutGrid, Utensils, Flame, CalendarDays, Share2, Copy, MessageCircle
 } from "lucide-react";
+import { toast } from "sonner";
 import { useSavedPropertiesStore } from "@/store/useSavedPropertiesStore";
 import { trackEvent } from "@/services/analytics";
 import SEOHead from "@/components/common/SEOHead";
 import { generatePropertySchema, generateBreadcrumbSchema, SITE_URL } from "@/lib/seo";
+import ScheduleVisitModal from "@/components/modals/ScheduleVisitModal";
 
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/public`;
 
@@ -30,6 +32,7 @@ const PublicPropertyDetail = () => {
   const initialUnitId = searchParams.get("unit");
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [expandedUnitId, setExpandedUnitId] = useState<string | null>(null);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const { isSaved, toggleSave } = useSavedPropertiesStore();
 
   const { data, isLoading, isError } = useQuery({
@@ -371,6 +374,54 @@ const PublicPropertyDetail = () => {
             </div>
           )}
 
+          {/* Schedule Visit Button */}
+          <button
+            onClick={() => setIsScheduleModalOpen(true)}
+            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-sm shadow-lg shadow-emerald-600/20 hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+          >
+            <CalendarDays size={18} /> বাসা দেখতে চাই — সময় নির্ধারণ করুন
+          </button>
+
+          {/* Social Share Card */}
+          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-3">
+            <h4 className="font-black text-on-surface text-sm flex items-center gap-2">
+              <Share2 size={16} className="text-primary" /> এই বাসাটি শেয়ার করুন
+            </h4>
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <button
+                onClick={() => {
+                  const url = encodeURIComponent(window.location.href);
+                  const text = encodeURIComponent(`${displayTitle}\nবিস্তারিত দেখুন: `);
+                  window.open(`https://api.whatsapp.com/send?text=${text}${url}`, "_blank");
+                }}
+                className="flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 px-1.5 sm:px-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 font-bold text-[10px] sm:text-xs transition-colors"
+                title="WhatsApp-এ শেয়ার করুন"
+              >
+                <MessageCircle size={14} className="shrink-0" /> <span className="truncate">WhatsApp</span>
+              </button>
+              <button
+                onClick={() => {
+                  const url = encodeURIComponent(window.location.href);
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+                }}
+                className="flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 px-1.5 sm:px-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 font-bold text-[10px] sm:text-xs transition-colors"
+                title="Facebook-এ শেয়ার করুন"
+              >
+                <span className="truncate">Facebook</span>
+              </button>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("লিংক কপি করা হয়েছে!");
+                }}
+                className="flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 px-1.5 sm:px-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 font-bold text-[10px] sm:text-xs transition-colors"
+                title="লিংক কপি করুন"
+              >
+                <Copy size={13} className="shrink-0" /> <span className="truncate">কপি</span>
+              </button>
+            </div>
+          </div>
+
           {/* CTA Card */}
           <div className="bg-gradient-to-br from-primary to-violet-600 rounded-3xl p-5 text-white shadow-xl shadow-primary/20">
             <h3 className="font-black text-lg mb-2">আগ্রহী?</h3>
@@ -403,6 +454,15 @@ const PublicPropertyDetail = () => {
         </div>
         </div>
       </div>
+
+      {/* Schedule Visit Modal */}
+      <ScheduleVisitModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        propertyId={data._id}
+        propertyName={data.name}
+        unitName={selectedUnit?.unitName}
+      />
     </div>
   );
 };

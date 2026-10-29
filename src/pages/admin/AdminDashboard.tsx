@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
+import { api } from "@/lib/axiosInstance";
 import { toast } from "sonner";
 import { 
   Users, 
@@ -15,7 +16,8 @@ import {
   ShieldAlert,
   UserCheck,
   UserX,
-  BarChart2
+  BarChart2,
+  Megaphone
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -59,19 +61,34 @@ interface StatsData {
 
 const AdminDashboard = () => {
   const { token } = useAuthStore();
+  const queryClient = useQueryClient();
   const [payNumbers, setPayNumbers] = useState({ bkashNumber: "", nagadNumber: "", rocketNumber: "" });
   const [isEditingSettings, setIsEditingSettings] = useState(false);
 
+  const [announcement, setAnnouncement] = useState({
+    message: "",
+    active: false,
+    type: "info" as "info" | "warning" | "success"
+  });
+  const [isEditingAnnouncement, setIsEditingAnnouncement] = useState(false);
+
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/public/system-settings`)
-      .then(res => res.json())
-      .then(data => {
+    api.get("/api/public/system-settings")
+      .then(res => {
+        const data = res.data;
         if (data.success && data.settings) {
           setPayNumbers({
             bkashNumber: data.settings.bkashNumber,
             nagadNumber: data.settings.nagadNumber,
             rocketNumber: data.settings.rocketNumber || ""
           });
+          if (data.settings.announcement) {
+            setAnnouncement({
+              message: data.settings.announcement.message || "",
+              active: !!data.settings.announcement.active,
+              type: data.settings.announcement.type || "info"
+            });
+          }
         }
       })
       .catch(err => console.error("Error fetching system settings:", err));
@@ -80,34 +97,37 @@ const AdminDashboard = () => {
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/admin/system-settings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token?.startsWith("Bearer ") ? token : `Bearer ${token}`
-        },
-        body: JSON.stringify(payNumbers)
+      const res = await api.post("/api/admin/system-settings", {
+        ...payNumbers,
+        announcement
       });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.message || "পেমেন্ট নম্বরসমূহ সফলভাবে আপডেট হয়েছে!");
-        setIsEditingSettings(false);
-      } else {
-        toast.error(data.message || "আপডেট ব্যর্থ হয়েছে!");
-      }
-    } catch (err) {
-      toast.error("সার্ভারে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+      toast.success(res.data?.message || "পেমেন্ট নম্বরসমূহ সফলভাবে আপডেট হয়েছে!");
+      setIsEditingSettings(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "আপডেট ব্যর্থ হয়েছে!");
+    }
+  };
+
+  const handleUpdateAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await api.post("/api/admin/system-settings", {
+        ...payNumbers,
+        announcement
+      });
+      toast.success(res.data?.message || "সিস্টেম নোটিশ সফলভাবে আপডেট হয়েছে!");
+      queryClient.invalidateQueries({ queryKey: ["global-announcement"] });
+      setIsEditingAnnouncement(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "আপডেট ব্যর্থ হয়েছে!");
     }
   };
 
   const { data, isLoading } = useQuery<StatsData>({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/admin/stats`, {
-        headers: { Authorization: token?.startsWith("Bearer ") ? token : `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to fetch stats");
-      return res.json() as Promise<StatsData>;
+      const res = await api.get<StatsData>("/api/admin/stats");
+      return res.data;
     },
     retry: false,
   });
@@ -243,6 +263,95 @@ const AdminDashboard = () => {
                 <p className="font-extrabold text-sm dark:text-slate-200 mt-0.5">{payNumbers.rocketNumber || "সেট করা নেই"}</p>
               </div>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Global System Announcement Management Card */}
+      <div className="bg-surface-container-lowest p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-xl">
+              <Megaphone size={22} />
+            </div>
+            <div>
+              <h2 className="font-extrabold text-xl text-slate-850 dark:text-slate-100 font-headline">📢 গ্লোবাল সিস্টেম নোটিশ ব্যানার</h2>
+              <p className="text-xs text-slate-400 font-bold mt-0.5">অ্যাপের সকল ব্যবহারকারীকে তাৎক্ষণিক নোটিশ বা অ্যালার্ট দেখান</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsEditingAnnouncement(!isEditingAnnouncement)}
+            className="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-black rounded-xl text-xs transition-colors self-start sm:self-auto cursor-pointer"
+          >
+            {isEditingAnnouncement ? "বাতিল করুন ✕" : "নোটিশ সম্পাদনা করুন ✍️"}
+          </button>
+        </div>
+
+        {isEditingAnnouncement ? (
+          <form onSubmit={handleUpdateAnnouncement} className="space-y-4 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2 space-y-1.5">
+                <label className="text-xs font-black text-slate-400 uppercase ml-1">নোটিশের বিবরণ (Message)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="যেমন: সার্ভার রক্ষণাবেক্ষণ কাজের জন্য আজ রাত ২টায় ৩০ মিনিট সাইট বন্ধ থাকবে।"
+                  value={announcement.message}
+                  onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-sm font-bold outline-none border border-transparent focus:border-primary/30 dark:text-slate-200"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-black text-slate-400 uppercase ml-1">ব্যানার টাইপ</label>
+                <select
+                  value={announcement.type}
+                  onChange={(e: any) => setAnnouncement({ ...announcement, type: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-sm font-bold outline-none border border-transparent focus:border-primary/30 dark:text-slate-200"
+                >
+                  <option value="info">তথ্য (Blue / Info)</option>
+                  <option value="warning">সতর্কবার্তা (Amber / Warning)</option>
+                  <option value="success">সুসংবাদ (Emerald / Success)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={announcement.active}
+                  onChange={(e) => setAnnouncement({ ...announcement, active: e.target.checked })}
+                  className="w-5 h-5 rounded text-primary focus:ring-primary/20 accent-primary"
+                />
+                <span className="text-sm font-black text-slate-700 dark:text-slate-200">
+                  ব্যানারটি সক্রিয় (Active) রাখুন
+                </span>
+              </label>
+
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-sm shadow-md shadow-primary/20 transition-all cursor-pointer"
+              >
+                নোটিশ আপডেট করুন ✓
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${
+                announcement.active ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-slate-200 text-slate-600 dark:bg-slate-600 dark:text-slate-300"
+              }`}>
+                {announcement.active ? "সক্রিয় (Active)" : "নিষ্ক্রিয় (Inactive)"}
+              </span>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                {announcement.message || "বর্তমানে কোনো নোটিশ সেট করা নেই"}
+              </p>
+            </div>
+            <span className="text-xs text-slate-400 font-bold uppercase">
+              টাইপ: {announcement.type}
+            </span>
           </div>
         )}
       </div>

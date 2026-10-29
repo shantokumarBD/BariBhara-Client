@@ -1,19 +1,26 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { CreditCard, FileText, Wrench, AlertTriangle, Building, Home, MapPin, CheckCircle2 } from "lucide-react";
+import {
+  CreditCard, FileText, Wrench, AlertTriangle, Building, Home, MapPin,
+  CheckCircle2, Calendar, LogOut, ArrowRight, ShieldCheck, Clock
+} from "lucide-react";
 import { useTenantAuthStore } from "../../store/useTenantAuthStore";
 import { Link } from "react-router-dom";
+import MoveOutNoticeModal from "@/components/modals/MoveOutNoticeModal";
+import EmergencyContactsCard from "@/components/tenant/EmergencyContactsCard";
 
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/tenant-portal`;
 
 const TenantDashboard = () => {
   const { token } = useTenantAuthStore();
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
 
   const authHeader = {
     Authorization: token?.startsWith("Bearer ") ? token : `Bearer ${token}`,
   };
 
-  const { data: dashboardData, isLoading } = useQuery({
+  const { data: dashboardData, isLoading, refetch } = useQuery({
     queryKey: ["tenant-dashboard"],
     queryFn: async () => {
       const res = await axios.get(`${API_URL}/dashboard`, { headers: authHeader });
@@ -31,22 +38,23 @@ const TenantDashboard = () => {
   }
 
   const { tenant, stats, recentInvoices, activeMaintenance } = dashboardData || {};
+  const moveOutNotice = tenant?.moveOutNotice;
 
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-primary to-primary/80 rounded-[32px] p-8 text-white shadow-xl shadow-primary/20 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 text-white shadow-xl shadow-primary/20 relative overflow-hidden">
         <div className="relative z-10">
-          <h1 className="text-3xl font-black mb-2">স্বাগতম, {tenant?.name}! 👋</h1>
-          <div className="flex flex-wrap items-center gap-4 text-white/90 text-sm font-bold mt-4">
+          <h1 className="text-2xl sm:text-3xl font-black mb-2">স্বাগতম, {tenant?.name}! 👋</h1>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-white/90 text-xs sm:text-sm font-bold mt-3 sm:mt-4">
             <span className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md">
-              <Building size={16} /> {tenant?.property?.name}
+              <Building size={15} /> {tenant?.property?.name}
             </span>
             <span className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md">
-              <Home size={16} /> ইউনিট: {tenant?.unit?.unitName}
+              <Home size={15} /> ইউনিট: {tenant?.unit?.unitName}
             </span>
             <span className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md">
-              <MapPin size={16} /> {tenant?.property?.address}
+              <MapPin size={15} /> {tenant?.property?.address}
             </span>
           </div>
         </div>
@@ -54,6 +62,56 @@ const TenantDashboard = () => {
         <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute right-20 -bottom-20 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
       </div>
+
+      {/* Move-Out Notice Banner / Action Card */}
+      {moveOutNotice?.expectedMoveOutDate ? (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-2xl sm:rounded-[28px] p-4 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <LogOut size={24} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200">
+                  বাসা ছাড়ার নোটিশ সক্রিয়
+                </span>
+                <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                  <Clock size={12} /> জমা: {new Date(moveOutNotice.noticeDate).toLocaleDateString("bn-BD")}
+                </span>
+              </div>
+              <h4 className="font-black text-slate-800 dark:text-slate-100 mt-1">
+                পরিকল্পিত প্রস্থান তারিখ: {new Date(moveOutNotice.expectedMoveOutDate).toLocaleDateString("bn-BD")}
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                কারণ: {moveOutNotice.reason || "ব্যক্তিগত কারণ"}
+              </p>
+            </div>
+          </div>
+          <div className="shrink-0 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 font-bold text-xs">
+              <ShieldCheck size={14} /> বাড়িওয়ালাকে অবহিত করা হয়েছে
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-slate-900 rounded-[28px] p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+              <Calendar size={20} />
+            </div>
+            <div>
+              <h4 className="font-black text-slate-800 dark:text-slate-100 text-sm">বাসা পরিবর্তনের পরিকল্পনা করছেন?</h4>
+              <p className="text-xs font-bold text-slate-400">বাড়িওয়ালাকে অগ্রিম ১ মাস পূর্বে বাসা ছাড়ার নোটিশ দিন</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsNoticeModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-md shadow-amber-500/20 hover:scale-[1.02] flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <LogOut size={14} /> নোটিশ জমা দিন
+          </button>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -119,7 +177,7 @@ const TenantDashboard = () => {
                 <div key={invoice._id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center text-primary font-black">
-                      {invoice.month.substring(0, 3)}
+                      {invoice.month?.substring(0, 3)}
                     </div>
                     <div>
                       <p className="font-bold text-slate-800 dark:text-slate-200">{invoice.month} {invoice.year}</p>
@@ -179,6 +237,19 @@ const TenantDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Emergency Hotlines and Landlord Contact */}
+      <EmergencyContactsCard
+        landlordPhone={tenant?.landlordPhone || tenant?.property?.owner?.phone || tenant?.property?.owner?.phoneNumber}
+        landlordName={tenant?.property?.owner?.fullName || "বাড়িওয়ালা"}
+      />
+
+      {/* Move-Out Notice Modal */}
+      <MoveOutNoticeModal
+        isOpen={isNoticeModalOpen}
+        onClose={() => setIsNoticeModalOpen(false)}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 };

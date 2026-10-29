@@ -176,41 +176,6 @@ const Sidebar = () => {
         </div>
       </aside>
 
-      {/* --- Mobile Bottom Nav --- */}
-      <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] h-20
-        bg-white/90 dark:bg-slate-900/95
-        backdrop-blur-2xl
-        border border-white/20 dark:border-slate-700/60
-        rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.12)]
-        z-[100] flex items-center justify-between px-6
-        transition-colors duration-300">
-        {navItems.filter(item => item.path !== "/reports").map((item) => {
-          const isActive = location.pathname === item.path;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.label}
-              to={item.path}
-              className={`flex flex-col items-center justify-center gap-1 p-2 rounded-2xl transition-all ${
-                isActive
-                  ? "text-primary scale-110"
-                  : "text-slate-400 dark:text-slate-500"
-              }`}
-            >
-              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[10px] font-bold ${isActive ? "opacity-100" : "opacity-0"}`}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-        <button
-          onClick={handleAddPropertyClick}
-          className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/30"
-        >
-          <PlusCircle size={24} />
-        </button>
-      </nav>
     </>
   );
 };

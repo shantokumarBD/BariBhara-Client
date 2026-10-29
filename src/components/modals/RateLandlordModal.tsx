@@ -38,17 +38,17 @@ const RateLandlordModal = ({ isOpen, onClose, onSave, isLoading, existingRating 
 
   const renderStars = (value: number, onChange: (val: number) => void) => {
     return (
-      <div className="flex gap-1">
+      <div className="flex gap-1 shrink-0">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
             onClick={() => onChange(star)}
-            className={`transition-all hover:scale-110 active:scale-95 ${
+            className={`transition-all hover:scale-110 active:scale-95 p-0.5 ${
               star <= value ? "text-amber-400" : "text-slate-200 dark:text-slate-700"
             }`}
           >
-            <Star size={24} fill={star <= value ? "currentColor" : "none"} strokeWidth={star <= value ? 0 : 2} />
+            <Star size={20} className="sm:w-6 sm:h-6" fill={star <= value ? "currentColor" : "none"} strokeWidth={star <= value ? 0 : 2} />
           </button>
         ))}
       </div>
@@ -56,15 +56,15 @@ const RateLandlordModal = ({ isOpen, onClose, onSave, isLoading, existingRating 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 border border-slate-100 dark:border-slate-700">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4">
+      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl sm:rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 border border-slate-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-100 dark:border-amber-900/30 flex justify-between items-center relative overflow-hidden">
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-100 dark:border-amber-900/30 flex justify-between items-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="relative z-10">
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <Star className="text-amber-500" fill="currentColor" size={22} /> বাড়িওয়ালা রেটিং
+          <div className="relative z-10 pr-6">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <Star className="text-amber-500" fill="currentColor" size={20} /> বাড়িওয়ালা রেটিং
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               আপনার বাড়িওয়ালা সম্পর্কে মতামত দিন
@@ -76,46 +76,46 @@ const RateLandlordModal = ({ isOpen, onClose, onSave, isLoading, existingRating 
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           
           {/* Overall Display */}
-          <div className="mb-6 flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+          <div className="mb-5 sm:mb-6 flex items-center justify-between p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700">
             <div>
               <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 mb-1">সর্বমোট রেটিং (Overall)</p>
               <div className="flex items-center gap-2">
-                <span className="text-3xl font-black text-slate-800 dark:text-slate-100">{overall > 0 ? overall.toFixed(1) : "0.0"}</span>
+                <span className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">{overall > 0 ? overall.toFixed(1) : "0.0"}</span>
                 <div className="flex text-amber-400">
-                  <Star size={20} fill="currentColor" strokeWidth={0} />
+                  <Star size={18} fill="currentColor" strokeWidth={0} />
                 </div>
               </div>
             </div>
             {overall >= 4.5 && (
-              <div className="flex flex-col items-center justify-center w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full text-white shadow-lg shadow-amber-500/30 rotate-12">
-                <Sparkles size={20} />
-                <span className="text-[9px] font-black mt-0.5">TOP</span>
+              <div className="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full text-white shadow-lg shadow-amber-500/30 rotate-12">
+                <Sparkles size={18} />
+                <span className="text-[8px] sm:text-[9px] font-black mt-0.5">TOP</span>
               </div>
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {/* Behavior */}
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                  <UserCheck size={16} className="text-blue-500" /> আচরণ (Behavior)
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 pr-2">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                  <UserCheck size={16} className="text-blue-500 shrink-0" /> আচরণ (Behavior)
                 </label>
-                <p className="text-[10px] text-slate-400">বাড়িওয়ালার সার্বিক আচরণ কেমন?</p>
+                <p className="text-[10px] text-slate-400 truncate">বাড়িওয়ালার সার্বিক আচরণ কেমন?</p>
               </div>
               {renderStars(behavior, setBehavior)}
             </div>
 
             {/* Maintenance */}
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                  <Wrench size={16} className="text-emerald-500" /> মেইনটেনেন্স (Service)
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 pr-2">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                  <Wrench size={16} className="text-emerald-500 shrink-0" /> মেইনটেনেন্স (Service)
                 </label>
-                <p className="text-[10px] text-slate-400">কোনো সমস্যা হলে কত দ্রুত সমাধান করে?</p>
+                <p className="text-[10px] text-slate-400 truncate">কোনো সমস্যা হলে কত দ্রুত সমাধান করে?</p>
               </div>
               {renderStars(maintenance, setMaintenance)}
             </div>

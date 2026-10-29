@@ -26,7 +26,7 @@ const Register = () => {
   return (
     <div className="bg-surface font-body text-on-surface min-h-screen flex flex-col">
       <SEOHead {...PAGE_SEO.register} />
-      <main className="flex-grow flex h-screen overflow-hidden">
+      <main className="flex-grow flex min-h-screen lg:h-screen lg:overflow-hidden">
         {/* Left Side: Visual/Branding */}
         <div className="hidden lg:flex lg:w-1/2 relative bg-surface-container overflow-hidden items-center justify-center p-12">
           <div className="absolute inset-0 z-0 select-none">
@@ -60,11 +60,11 @@ const Register = () => {
         </div>
 
         {/* Right Side: Registration Form */}
-        <div className="w-full lg:w-1/2 bg-surface-container-high flex items-center justify-center p-8 overflow-y-auto">
-          <div className="w-full max-w-md space-y-10">
-            <div className="space-y-3">
-              <h2 className="font-headline text-4xl font-bold text-on-surface">অ্যাকাউন্ট তৈরি করুন</h2>
-              <p className="text-on-surface-variant font-medium">Bari Bhara এ নতুন? শুরু করতে নিচের তথ্যগুলো পূরণ করুন।</p>
+        <div className="w-full lg:w-1/2 bg-surface-container-high flex items-center justify-center p-4 sm:p-8 md:p-12 overflow-y-auto">
+          <div className="w-full max-w-md space-y-6 sm:space-y-8 my-auto">
+            <div className="space-y-2">
+              <h2 className="font-headline text-2xl sm:text-4xl font-bold text-on-surface">অ্যাকাউন্ট তৈরি করুন</h2>
+              <p className="text-on-surface-variant font-medium text-xs sm:text-sm">Bari Bhara এ নতুন? শুরু করতে নিচের তথ্যগুলো পূরণ করুন।</p>
             </div>
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

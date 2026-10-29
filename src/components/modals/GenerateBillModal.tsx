@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Calendar, CreditCard, Zap, Droplets, Flame, ShieldAlert, PlusCircle, Save } from "lucide-react";
+import { X, Calendar, CreditCard, Zap, Droplets, Flame, ShieldAlert, PlusCircle, Save, Calculator } from "lucide-react";
 import { useRent } from "@/Hook/useRent";
 
 interface GenerateBillModalProps {
@@ -18,6 +18,11 @@ const GenerateBillModal = ({ isOpen, onClose, tenant }: GenerateBillModalProps) 
   
   const currentMonth = months[new Date().getMonth()];
   const currentYear = new Date().getFullYear();
+
+  // Sub-meter quick calculator state
+  const [showSubMeter, setShowSubMeter] = useState(false);
+  const [prevMeter, setPrevMeter] = useState("");
+  const [currMeter, setCurrMeter] = useState("");
 
   const [formData, setFormData] = useState({
     month: currentMonth,
@@ -186,6 +191,68 @@ const GenerateBillModal = ({ isOpen, onClose, tenant }: GenerateBillModalProps) 
                 className="w-full px-3 py-2.5 bg-slate-50 rounded-xl outline-none text-sm font-bold border border-transparent focus:border-orange-200"
               />
             </div>
+          </div>
+
+          {/* সাব-মিটার রিডিং ক্যালকুলেটর টগল */}
+          <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 rounded-2xl p-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                <Calculator size={15} className="text-amber-600" /> সাব-মিটার ক্যালকুলেটর (রিডিং বিয়োগ করুন)
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowSubMeter(!showSubMeter)}
+                className="text-xs font-black text-amber-600 hover:text-amber-700 underline"
+              >
+                {showSubMeter ? "লুকান" : "ক্যালকুলেটর খুলুন"}
+              </button>
+            </div>
+
+            {showSubMeter && (
+              <div className="mt-3 pt-3 border-t border-amber-200/50 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">পূর্বের রিডিং</label>
+                    <input
+                      type="number"
+                      placeholder="যেমন: ১২০০"
+                      value={prevMeter}
+                      onChange={(e) => setPrevMeter(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white rounded-lg text-xs font-bold border border-amber-200 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">বর্তমান রিডিং</label>
+                    <input
+                      type="number"
+                      placeholder="যেমন: ১২৭০"
+                      value={currMeter}
+                      onChange={(e) => setCurrMeter(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white rounded-lg text-xs font-bold border border-amber-200 outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-1">
+                  <span className="text-xs font-bold text-slate-600">
+                    ব্যবহৃত ইউনিট:{" "}
+                    <span className="text-orange-600 font-black">
+                      {Math.max(0, (Number(currMeter) || 0) - (Number(prevMeter) || 0))}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const units = Math.max(0, (Number(currMeter) || 0) - (Number(prevMeter) || 0));
+                      setFormData((p) => ({ ...p, electricityUnits: String(units) }));
+                      setShowSubMeter(false);
+                    }}
+                    className="px-3 py-1 bg-amber-600 text-white rounded-lg text-xs font-bold hover:bg-amber-700 transition-all"
+                  >
+                    বিল ফর্মে যুক্ত করুন
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ইউটিলিটি বিল গ্রিড */}

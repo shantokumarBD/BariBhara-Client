@@ -6,6 +6,7 @@ import { useAuthStore } from "./store/useAuthStore"
 import { useEffect } from "react"
 import { usePushNotifications } from "./Hook/usePushNotifications"
 import { InstallPWA } from "./components/common/InstallPWA"
+import { GlobalAnnouncementBanner } from "./components/common/GlobalAnnouncementBanner"
 
 const App = () => {
   const { user, token, setAuth } = useAuthStore();
@@ -42,6 +43,7 @@ const App = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <GlobalAnnouncementBanner />
       {!hideNavbar && <Navbar />}
       <main className="flex-1">
         <Outlet />

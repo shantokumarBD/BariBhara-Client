@@ -26,7 +26,7 @@ const BottomNavigation = () => {
     { name: "হোম", path: "/dashboard", icon: LayoutDashboard },
     { name: "প্রপার্টি", path: "/properties", icon: Building2 },
     { name: "ভাড়াটিয়া", path: "/tenants", icon: Users },
-    { name: "পেমেন্ট", path: "/rent", icon: CreditCard },
+    { name: "পেমেন্ট", path: "/payments", icon: CreditCard },
     { name: "সেটিংস", path: "/settings", icon: Settings },
   ];
 
@@ -45,8 +45,8 @@ const BottomNavigation = () => {
   if (!hasAccess) return null;
 
   return (
-    <div className="md:hidden fixed bottom-6 left-4 right-4 z-40">
-      <div className="bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl border border-white/10 dark:border-white/5 rounded-full px-4 py-3 shadow-2xl flex items-center justify-between gap-1 max-w-lg mx-auto transition-all duration-300">
+    <div className="md:hidden fixed bottom-3 sm:bottom-6 left-2 right-2 sm:left-4 sm:right-4 z-50 pointer-events-none">
+      <div className="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-2xl border border-white/10 dark:border-white/5 rounded-3xl sm:rounded-full px-2 sm:px-4 py-2.5 sm:py-3 shadow-2xl flex items-center justify-between gap-0.5 sm:gap-1 max-w-lg mx-auto pointer-events-auto transition-all duration-300">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;

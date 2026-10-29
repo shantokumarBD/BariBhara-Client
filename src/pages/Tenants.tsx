@@ -10,7 +10,8 @@ import DeleteAgreementModal from "@/components/modals/DeleteAgreementModal";
 import ReviewNidModal from "@/components/modals/ReviewNidModal";
 import UtilitySettingsModal from "@/components/modals/UtilitySettingsModal";
 import RateTenantModal from "@/components/modals/RateTenantModal";
-import { ShieldCheck, ShieldOff, FileText, IdCard, Settings2, Star } from "lucide-react";
+import DepositSettlementModal from "@/components/modals/DepositSettlementModal";
+import { ShieldCheck, ShieldOff, FileText, IdCard, Settings2, Star, Banknote, LogOut } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
 
 const ITEMS_PER_PAGE = 9;
@@ -25,6 +26,7 @@ const Tenants = () => {
   const [reviewingNidTenant, setReviewingNidTenant] = useState<any>(null);
   const [utilityTenant, setUtilityTenant] = useState<any>(null);
   const [ratingTenant, setRatingTenant] = useState<any>(null);
+  const [settlingDepositTenant, setSettlingDepositTenant] = useState<any>(null);
 
   const { 
     tenants, total, totalPages, isTenantsLoading, 
@@ -103,18 +105,18 @@ const Tenants = () => {
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-6 sm:space-y-8 p-3.5 sm:p-6 lg:p-8">
       {/* হেডার */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Users className="text-primary" size={26} /> ভাড়াটিয়া তালিকা
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <Users className="text-primary" size={24} /> ভাড়াটিয়া তালিকা
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
             আপনার সকল সক্রিয় ভাড়াটিয়াদের কেন্দ্রীয় তালিকা
           </p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
@@ -122,7 +124,7 @@ const Tenants = () => {
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="নাম, ফোন, প্রপার্টি খুঁজুন..."
-              className="w-full pl-10 pr-9 py-2.5 bg-white dark:bg-slate-800 rounded-2xl text-sm font-bold border border-slate-200 dark:border-slate-700 outline-none focus:border-primary/40 dark:text-slate-200"
+              className="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-slate-800 rounded-2xl text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-700 outline-none focus:border-primary/40 dark:text-slate-200"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -130,7 +132,7 @@ const Tenants = () => {
               </button>
             )}
           </div>
-          <div className="px-5 py-2.5 bg-primary/10 dark:bg-primary/20 text-primary rounded-2xl font-black text-sm shrink-0">
+          <div className="px-3.5 sm:px-5 py-2.5 bg-primary/10 dark:bg-primary/20 text-primary rounded-2xl font-black text-xs sm:text-sm shrink-0">
             মোট: {total} জন
           </div>
         </div>
@@ -223,6 +225,39 @@ const Tenants = () => {
                     </span>
                   </div>
 
+                  {/* Move-Out Notice & Deposit Settlement Banner */}
+                  {tenant.depositSettlement?.status === "settled" ? (
+                    <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-300">জামানত নিষ্পত্তি সম্পন্ন</p>
+                          <p className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
+                            ফেরত: ৳{(tenant.depositSettlement.netRefundAmount || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded">
+                        ছেড়ে দিয়েছে
+                      </span>
+                    </div>
+                  ) : tenant.moveOutNotice?.expectedMoveOutDate ? (
+                    <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-300 truncate">বাসা ছাড়ার নোটিশ প্রাপ্ত</p>
+                        <p className="text-xs font-bold text-amber-900 dark:text-amber-200 truncate">
+                          প্রস্থান: {new Date(tenant.moveOutNotice.expectedMoveOutDate).toLocaleDateString("bn-BD")}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSettlingDepositTenant(tenant)}
+                        className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-[10px] shadow-sm flex items-center gap-1 transition-all shrink-0 cursor-pointer"
+                      >
+                        <Banknote size={13} /> জামানত নিষ্পত্তি
+                      </button>
+                    </div>
+                  ) : null}
+
                   {/* Lease Expiry Warning Badge */}
                   {(() => {
                     const lease = getLeaseStatus(tenant.leaseEnd);
@@ -301,35 +336,38 @@ const Tenants = () => {
                   </div>
 
                   {/* পোর্টাল, ডকুমেন্টস, ইউটিলিটি, রেটিং */}
-                  <div className="pt-2 border-t border-slate-50 dark:border-slate-700 flex gap-2">
+                  <div className="pt-2 border-t border-slate-50 dark:border-slate-700 grid grid-cols-4 gap-1 sm:gap-1.5">
                     <button
                       onClick={() => setSelectedTenant(tenant)}
-                      className="flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
+                      className="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[9px] sm:text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
                     >
                       {tenant.portalEnabled ? (
-                        <ShieldCheck size={16} className="text-emerald-500" />
+                        <ShieldCheck size={15} className="text-emerald-500" />
                       ) : (
-                        <ShieldOff size={16} className="text-slate-400" />
+                        <ShieldOff size={15} className="text-slate-400" />
                       )}
-                      পোর্টাল
+                      <span className="truncate w-full text-center">পোর্টাল</span>
                     </button>
                     <button
                       onClick={() => setDocumentTenant(tenant)}
-                      className="flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-900/20"
+                      className="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[9px] sm:text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-900/20"
                     >
-                      <FileText size={16} className="text-violet-500" /> ডকুমেন্টস
+                      <FileText size={15} className="text-violet-500" />
+                      <span className="truncate w-full text-center">ডকুমেন্টস</span>
                     </button>
                     <button
                       onClick={() => setUtilityTenant(tenant)}
-                      className="flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20"
+                      className="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[9px] sm:text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20"
                     >
-                      <Settings2 size={16} className="text-blue-500" /> ইউটিলিটি
+                      <Settings2 size={15} className="text-blue-500" />
+                      <span className="truncate w-full text-center">ইউটিলিটি</span>
                     </button>
                     <button
                       onClick={() => setRatingTenant(tenant)}
-                      className="flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/20"
+                      className="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl font-bold text-[9px] sm:text-[10px] transition-colors bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/20"
                     >
-                      <Star size={16} className="text-amber-500" /> রেটিং দিন
+                      <Star size={15} className="text-amber-500" />
+                      <span className="truncate w-full text-center">রেটিং দিন</span>
                     </button>
                   </div>
 
@@ -447,6 +485,12 @@ const Tenants = () => {
         tenant={ratingTenant}
         onSave={handleRateTenant}
         isLoading={rateTenantMutation.isPending}
+      />
+      <DepositSettlementModal
+        isOpen={!!settlingDepositTenant}
+        onClose={() => setSettlingDepositTenant(null)}
+        tenant={settlingDepositTenant}
+        onSuccess={() => window.location.reload()}
       />
     </div>
   );

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useRent } from "@/Hook/useRent";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { api } from "@/lib/axiosInstance";
 import { toast } from "sonner";
 import {
   CreditCard, Search, Calendar, Home,
   AlertCircle, Clock, Banknote, Mail, BellRing, FileSpreadsheet,
-  Edit, Trash2, CheckCircle, Download, History, XCircle
+  Edit, Trash2, CheckCircle, Download, History, XCircle, MessageCircle, Sparkles
 } from "lucide-react";
+import { openWhatsAppRentReminder } from "@/lib/whatsappHelper";
 import CollectPaymentModal from "@/components/modals/CollectPaymentModal";
 import BulkInvoiceModal from "@/components/modals/BulkInvoiceModal";
 import ConfirmReminderModal from "@/components/modals/ConfirmReminderModal";
@@ -51,6 +53,8 @@ const RentManagement = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [editInvoiceTarget, setEditInvoiceTarget] = useState<any>(null);
   const [deleteInvoiceTarget, setDeleteInvoiceTarget] = useState<any>(null);
+  const [isTriggeringCron, setIsTriggeringCron] = useState(false);
+  const queryClient = useQueryClient();
 
   const {
     pendingInvoices, total, totalPages, isPendingLoading,
@@ -88,6 +92,20 @@ const RentManagement = () => {
     }
   };
 
+  const handleTriggerMonthlyCron = async () => {
+    setIsTriggeringCron(true);
+    try {
+      const res = await api.post("/api/rent/trigger-monthly-cron");
+      toast.success(res.data?.message || "মাসিক রেন্ট ইনভয়েস সফলভাবে প্রস্তুত হয়েছে!");
+      queryClient.invalidateQueries({ queryKey: ["pending-invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["invoice-stats"] });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "বিল তৈরি করতে সমস্যা হয়েছে");
+    } finally {
+      setIsTriggeringCron(false);
+    }
+  };
+
   const filteredInvoices = pendingInvoices.filter((inv: any) =>
     inv.tenant?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     inv.property?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -103,51 +121,64 @@ const RentManagement = () => {
   };
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-6 sm:space-y-8 p-3.5 sm:p-6 lg:p-8">
       {/* হেডার */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <CreditCard className="text-primary" size={26} /> ভাড়া ও পেমেন্ট
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <CreditCard className="text-primary" size={24} /> ভাড়া ও পেমেন্ট
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">সব ইনভয়েস ম্যানেজ করুন — বকেয়া, আংশিক ও পেইড</p>
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">সব ইনভয়েস ম্যানেজ করুন — বকেয়া, আংশিক ও পেইড</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <button
+            onClick={handleTriggerMonthlyCron}
+            disabled={isTriggeringCron}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/30 hover:scale-105 transition-all disabled:opacity-50 text-xs sm:text-sm cursor-pointer"
+            title="চলতি মাসের জন্য সমস্ত ভাড়াটিয়ার বিল স্বয়ংক্রিয়ভাবে তৈরি করুন"
+          >
+            {isTriggeringCron ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Sparkles size={16} />
+            )}
+            অটো-বিল রান
+          </button>
           <button onClick={() => setBulkModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-3 bg-violet-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-200 hover:scale-105 transition-all">
-            <FileSpreadsheet size={18} /> বাল্ক বিল
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 bg-violet-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-200 hover:scale-105 transition-all text-xs sm:text-sm cursor-pointer">
+            <FileSpreadsheet size={16} /> বাল্ক বিল
           </button>
           <button onClick={() => setReminderModalOpen(true)} disabled={sendingReminder}
-            className="flex items-center gap-2 px-5 py-3 bg-amber-500 text-white font-bold rounded-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/30 hover:scale-105 transition-all disabled:opacity-50">
-            {sendingReminder ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <BellRing size={18} />}
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-amber-500 text-white font-bold rounded-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/30 hover:scale-105 transition-all disabled:opacity-50 text-xs sm:text-sm cursor-pointer">
+            {sendingReminder ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <BellRing size={16} />}
             ইমেইল রিমাইন্ডার
           </button>
         </div>
       </div>
 
       {/* স্ট্যাটাস কার্ড */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-red-50 dark:bg-red-900/20 p-5 rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
-          <p className="text-[10px] font-black text-red-400 uppercase tracking-wider">বকেয়া বিল</p>
-          <p className="text-2xl font-black text-red-600 dark:text-red-400 mt-1">{invoiceStats.Unpaid.count}</p>
-          <p className="text-xs font-bold text-red-400 mt-0.5">৳ {invoiceStats.Unpaid.totalDue.toLocaleString()}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-red-50 dark:bg-red-900/20 p-3.5 sm:p-5 rounded-2xl sm:rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
+          <p className="text-[9px] sm:text-[10px] font-black text-red-400 uppercase tracking-wider">বকেয়া বিল</p>
+          <p className="text-xl sm:text-2xl font-black text-red-600 dark:text-red-400 mt-1">{invoiceStats.Unpaid.count}</p>
+          <p className="text-[11px] sm:text-xs font-bold text-red-400 mt-0.5 truncate">৳ {invoiceStats.Unpaid.totalDue.toLocaleString()}</p>
         </div>
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
-          <p className="text-[10px] font-black text-blue-400 uppercase tracking-wider">আংশিক পেইড</p>
-          <p className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">{invoiceStats.Partial.count}</p>
-          <p className="text-xs font-bold text-blue-400 mt-0.5">৳ {invoiceStats.Partial.totalDue.toLocaleString()} বাকি</p>
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3.5 sm:p-5 rounded-2xl sm:rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
+          <p className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-wider">আংশিক পেইড</p>
+          <p className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">{invoiceStats.Partial.count}</p>
+          <p className="text-[11px] sm:text-xs font-bold text-blue-400 mt-0.5 truncate">৳ {invoiceStats.Partial.totalDue.toLocaleString()} বাকি</p>
         </div>
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-5 rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
-          <p className="text-[10px] font-black text-emerald-500 uppercase tracking-wider">পেইড</p>
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{invoiceStats.Paid.count}</p>
-          <p className="text-xs font-bold text-emerald-500 mt-0.5">সম্পূর্ণ পরিশোধিত</p>
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3.5 sm:p-5 rounded-2xl sm:rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
+          <p className="text-[9px] sm:text-[10px] font-black text-emerald-500 uppercase tracking-wider">পেইড</p>
+          <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{invoiceStats.Paid.count}</p>
+          <p className="text-[11px] sm:text-xs font-bold text-emerald-500 mt-0.5 truncate">পরিশোধিত</p>
         </div>
-        <div className="bg-slate-50 dark:bg-slate-700/50 p-5 rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">চলতি মাস</p>
-          <p className="text-lg font-black text-slate-700 dark:text-slate-200 mt-1">
+        <div className="bg-slate-50 dark:bg-slate-700/50 p-3.5 sm:p-5 rounded-2xl sm:rounded-[28px] border border-white/50 dark:border-white/5 shadow-sm">
+          <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-wider">চলতি মাস</p>
+          <p className="text-base sm:text-lg font-black text-slate-700 dark:text-slate-200 mt-1 truncate">
             {new Date().toLocaleString("bn-BD", { month: "long" })}
           </p>
-          <p className="text-xs font-bold text-slate-400 mt-0.5">{new Date().getFullYear()}</p>
+          <p className="text-[11px] sm:text-xs font-bold text-slate-400 mt-0.5">{new Date().getFullYear()}</p>
         </div>
       </div>
 
@@ -219,21 +250,21 @@ const RentManagement = () => {
               filteredInvoices.map((inv: any) => (
                 <div
                   key={inv._id}
-                  className="bg-slate-50 dark:bg-slate-700/10 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col gap-4"
+                  className="bg-white dark:bg-slate-800/80 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-3 sm:gap-4"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center font-black text-xs">
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center font-black text-xs shrink-0">
                         {inv.tenant?.name?.charAt(0)}
                       </div>
-                      <div>
-                        <p className="text-sm font-black text-slate-800 dark:text-slate-100">{inv.tenant?.name}</p>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
-                          <Home size={10} /> {inv.property?.name} • {inv.unit?.unitName}
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-slate-800 dark:text-slate-100 truncate">{inv.tenant?.name}</p>
+                        <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold truncate">
+                          <Home size={10} className="shrink-0" /> <span className="truncate">{inv.property?.name} • {inv.unit?.unitName}</span>
                         </div>
                       </div>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
+                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase shrink-0 ${
                       inv.status === "Paid"
                         ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
                         : inv.status === "Partial"
@@ -244,36 +275,89 @@ const RentManagement = () => {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 py-3 border-y border-slate-100 dark:border-slate-800/40 text-center">
+                  <div className="grid grid-cols-2 gap-2 py-2.5 border-y border-slate-100 dark:border-slate-800/40 text-center">
                     <div>
                       <p className="text-[10px] text-slate-400 font-bold uppercase">মাস / বছর</p>
-                      <p className="font-black text-xs text-slate-700 dark:text-slate-200 mt-1">{inv.month}, {inv.year}</p>
+                      <p className="font-black text-xs text-slate-700 dark:text-slate-200 mt-0.5">{inv.month}, {inv.year}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-400 font-bold uppercase">মোট বিল</p>
-                      <p className="font-black text-xs text-slate-700 dark:text-slate-200 mt-1">৳ {inv.totalAmount?.toLocaleString()}</p>
+                      <p className="font-black text-xs text-slate-700 dark:text-slate-200 mt-0.5">৳ {inv.totalAmount?.toLocaleString()}</p>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center py-2">
-                    <div>
+                  {/* Payment Details & Badges */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 font-bold">পরিশোধ পরিস্থিতি:</span>
                       {inv.status === "Paid" ? (
-                        <p className="text-xs font-black text-emerald-600 dark:text-emerald-400">৳ {inv.paidAmount?.toLocaleString()} পেইড</p>
+                        <span className="font-black text-emerald-600 dark:text-emerald-400">৳ {inv.paidAmount?.toLocaleString()} পেইড ✓</span>
                       ) : (
-                        <p className="text-xs font-black text-orange-600 dark:text-orange-400">৳ {inv.dueAmount?.toLocaleString()} বাকি</p>
+                        <span className="font-black text-orange-600 dark:text-orange-400">৳ {inv.dueAmount?.toLocaleString()} বাকি</span>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      {/* PDF ডাউনলোড */}
-                      <button
-                        onClick={() => handleDownloadPdf(inv._id)}
-                        className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-500 rounded-xl transition-all"
-                        title="PDF ডাউনলোড"
-                      >
-                        <Download size={14} />
-                      </button>
 
-                      {/* ইমেইল রিমাইন্ডার */}
+                    {inv.lateFee > 0 && (
+                      <div className="inline-block px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400 text-[10px] font-black rounded border border-red-200">
+                        +৳{inv.lateFee.toLocaleString()} বিলম্ব ফি
+                      </div>
+                    )}
+
+                    {inv.pendingPayment?.amount > 0 && (
+                      <div className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-[10px] rounded-xl font-bold border border-amber-200 dark:border-amber-800 flex items-center gap-1.5">
+                        <Clock size={12} className="shrink-0 text-amber-500" />
+                        <span>অপেক্ষমান: ৳{inv.pendingPayment.amount.toLocaleString()} ({inv.pendingPayment.method})</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Toolbar on Mobile */}
+                  <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/60 flex flex-wrap items-center justify-between gap-1.5">
+                    {/* Primary Action Button (Collect or Paid Badge) */}
+                    {inv.status !== "Paid" ? (
+                      <button
+                        onClick={() => {
+                          setSelectedInvoice(inv);
+                          setCollectModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-black shadow-sm hover:scale-105 active:scale-95 transition-all"
+                      >
+                        <Banknote size={13} /> টাকা গ্রহণ
+                      </button>
+                    ) : (
+                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg">
+                        সম্পূর্ণ পরিশোধিত
+                      </span>
+                    )}
+
+                    {/* Quick Tools */}
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      {/* WhatsApp Reminder */}
+                      {inv.status !== "Paid" && (
+                        <button
+                          onClick={() => {
+                            const phone = inv.tenant?.phone || inv.tenant?.whatsapp || "";
+                            if (!phone) {
+                              toast.error("ভাড়াটিয়ার ফোন নম্বর পাওয়া যায়নি!");
+                              return;
+                            }
+                            openWhatsAppRentReminder({
+                              phone,
+                              tenantName: inv.tenant?.name || "সম্মানিত ভাড়াটিয়া",
+                              unitName: inv.unit?.unitName,
+                              month: inv.month,
+                              amount: inv.dueAmount || inv.totalAmount,
+                            });
+                            toast.success("WhatsApp ওপেন করা হচ্ছে...");
+                          }}
+                          className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl transition-all"
+                          title="WhatsApp রিমাইন্ডার"
+                        >
+                          <MessageCircle size={15} />
+                        </button>
+                      )}
+
+                      {/* Email Reminder */}
                       {inv.tenant?.email && inv.status !== "Paid" && (
                         <button
                           onClick={async () => {
@@ -287,22 +371,18 @@ const RentManagement = () => {
                           className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-500 rounded-xl transition-all"
                           title="ইমেইল রিমাইন্ডার"
                         >
-                          <Mail size={14} />
+                          <Mail size={15} />
                         </button>
                       )}
 
-                      {/* টাকা গ্রহণ */}
-                      {inv.status !== "Paid" && (
-                        <button
-                          onClick={() => {
-                            setSelectedInvoice(inv);
-                            setCollectModalOpen(true);
-                          }}
-                          className="inline-flex items-center gap-1 px-3 py-2 bg-emerald-500 text-white rounded-xl text-[10px] font-black hover:scale-105 active:scale-95 transition-all"
-                        >
-                          <Banknote size={12} /> টাকা গ্রহণ
-                        </button>
-                      )}
+                      {/* PDF ডাউনলোড */}
+                      <button
+                        onClick={() => handleDownloadPdf(inv._id)}
+                        className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-500 rounded-xl transition-all"
+                        title="PDF ডাউনলোড"
+                      >
+                        <Download size={15} />
+                      </button>
 
                       {/* এডিট / ডিলিট */}
                       {inv.status === "Unpaid" && (
@@ -399,6 +479,11 @@ const RentManagement = () => {
                         ) : (
                           <div>
                             <p className="text-sm font-black text-orange-600 dark:text-orange-400">৳ {inv.dueAmount?.toLocaleString()} বাকি</p>
+                            {inv.lateFee > 0 && (
+                              <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400 text-[10px] font-black rounded border border-red-200">
+                                +৳{inv.lateFee.toLocaleString()} বিলম্ব ফি
+                              </span>
+                            )}
                             {inv.paidAmount > 0 && (
                               <p className="text-[10px] text-slate-400 font-bold">৳ {inv.paidAmount?.toLocaleString()} পেইড</p>
                             )}
@@ -447,6 +532,31 @@ const RentManagement = () => {
                               className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-xl transition-all"
                             >
                               <Mail size={15} />
+                            </button>
+                          )}
+
+                          {/* ১-ক্লিক হোয়াটসঅ্যাপ রিমাইন্ডার */}
+                          {inv.status !== "Paid" && (
+                            <button
+                              title="হোয়াটসঅ্যাপ রিমাইন্ডার পাঠান"
+                              onClick={() => {
+                                const phone = inv.tenant?.phone || inv.tenant?.whatsapp || "";
+                                if (!phone) {
+                                  toast.error("ভাড়াটিয়ার ফোন নম্বর পাওয়া যায়নি!");
+                                  return;
+                                }
+                                openWhatsAppRentReminder({
+                                  phone,
+                                  tenantName: inv.tenant?.name || "সম্মানিত ভাড়াটিয়া",
+                                  unitName: inv.unit?.unitName,
+                                  month: inv.month,
+                                  amount: inv.dueAmount || inv.totalAmount,
+                                });
+                                toast.success("WhatsApp ওপেন করা হচ্ছে...");
+                              }}
+                              className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl transition-all"
+                            >
+                              <MessageCircle size={15} />
                             </button>
                           )}
 

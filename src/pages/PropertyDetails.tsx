@@ -59,9 +59,9 @@ const PropertyDetails = () => {
       </div>
 
       {/* ৫. বিল্ডিং ইনফো কার্ড (লাইভ ডাটা সহ) */}
-      <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm flex flex-col xl:flex-row gap-8 items-center justify-between overflow-hidden">
-        <div className="flex flex-col md:flex-row gap-8 items-center flex-1 w-full">
-          <div className="w-full md:w-64 h-48 rounded-2xl overflow-hidden shadow-lg bg-slate-100 flex-shrink-0">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[32px] p-4 sm:p-6 lg:p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col xl:flex-row gap-6 sm:gap-8 items-center justify-between overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-6 sm:gap-8 items-center flex-1 w-full">
+          <div className="w-full md:w-64 h-44 sm:h-48 rounded-2xl overflow-hidden shadow-lg bg-slate-100 dark:bg-slate-800 flex-shrink-0">
           {property?.images?.[0] ? (
             <img
               src={property.images[0].startsWith("http") ? property.images[0] : `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/${property.images[0].replace(/\\/g, "/")}`}
@@ -69,25 +69,25 @@ const PropertyDetails = () => {
               alt="Building"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-300 font-bold">
+            <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600 font-bold">
               ছবি নেই
             </div>
           )}
         </div>
-        <div className="flex-1 space-y-4 text-center md:text-left">
+        <div className="flex-1 space-y-3 sm:space-y-4 text-center md:text-left">
           <div>
-            <h2 className="text-3xl font-black text-slate-800">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
               {property?.name}
             </h2>
-            <p className="text-slate-500 flex items-center justify-center md:justify-start gap-2 mt-1 text-sm">
-              <MapPin size={14} /> {property?.location}
+            <p className="text-slate-500 dark:text-slate-400 flex items-center justify-center md:justify-start gap-2 mt-1 text-xs sm:text-sm">
+              <MapPin size={14} className="text-primary shrink-0" /> {property?.location}
             </p>
           </div>
-          <div className="flex flex-wrap justify-center md:justify-start gap-3">
-            <span className="px-4 py-2 bg-violet-50 text-violet-600 rounded-xl text-[10px] font-black uppercase tracking-wider">
+          <div className="flex flex-wrap justify-center md:justify-start gap-2.5 sm:gap-3">
+            <span className="px-3.5 py-1.5 bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-xl text-[10px] font-black uppercase tracking-wider">
               {property?.totalFloors} তলা বিল্ডিং
             </span>
-            <span className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-wider">
+            <span className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-wider">
               {units?.length || 0}টি ইউনিট
             </span>
           </div>
@@ -95,7 +95,7 @@ const PropertyDetails = () => {
         </div>
 
         {/* 🗺️ লাইভ ম্যাপ উইজেট */}
-        <div className="w-full xl:w-80 h-48 rounded-2xl overflow-hidden border border-slate-100 shadow-sm relative bg-slate-50 flex-shrink-0">
+        <div className="w-full xl:w-80 h-44 sm:h-48 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm relative bg-slate-50 dark:bg-slate-850 flex-shrink-0">
           <iframe
             title="Property Location Map"
             src={getMapEmbedUrl(property?.location || "")}
@@ -108,19 +108,19 @@ const PropertyDetails = () => {
       </div>
 
       {/* ৬. ইউনিট লিস্ট এবং অ্যাড বাটন */}
-      <div className="flex justify-between items-center px-2">
-        <h3 className="text-xl font-bold text-slate-800">রুম/ফ্ল্যাট তালিকা</h3>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-2">
+        <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">রুম/ফ্ল্যাট তালিকা</h3>
         <button 
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl hover:scale-105 transition-all shadow-lg shadow-primary/20"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-white px-4 sm:px-5 py-2.5 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 text-xs sm:text-sm font-bold"
         >
           <Plus size={18} /> নতুন ইউনিট যোগ করুন
         </button>
       </div>
 
-      {/* ৭. লাইভ ইউনিট টেবিল */}
+      {/* ৭. লাইভ ইউনিট টেবিল ও মোবাইল কার্ড */}
       {isUnitsLoading ? (
-        <div className="p-10 text-center font-bold">লোড হচ্ছে...</div>
+        <div className="p-10 text-center font-bold text-slate-400">লোড হচ্ছে...</div>
       ) : units?.length === 0 ? (
         <EmptyState
           title="কোনো রুম বা ফ্ল্যাট (Unit) নেই!"
@@ -130,98 +130,188 @@ const PropertyDetails = () => {
           onAction={() => setModalOpen(true)}
         />
       ) : (
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse whitespace-nowrap min-w-[800px]">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="p-5 text-xs font-black text-slate-400 uppercase">ইউনিট</th>
-                <th className="p-5 text-xs font-black text-slate-400 uppercase">তলা</th>
-                <th className="p-5 text-xs font-black text-slate-400 uppercase">ভাড়া</th>
-                <th className="p-5 text-xs font-black text-slate-400 uppercase">অবস্থা</th>
-                <th className="p-5 text-xs font-black text-slate-400 uppercase text-right">অ্যাকশন</th>
-              </tr>
-            </thead>
-            <tbody>
-              {units?.map((unit: any) => (
-                <tr key={unit._id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-all group">
-                  <td className="p-5">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-3">
-                        {unit.images && unit.images.length > 0 ? (
-                          <img 
-                            src={unit.images[0].startsWith("http") ? unit.images[0] : `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/${unit.images[0].replace(/\\/g, "/")}`} 
-                            alt="unit" 
-                            className="w-10 h-10 rounded-lg object-cover bg-slate-100"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300">
-                            <Grid size={16} />
-                          </div>
-                        )}
-                        <span className="font-bold text-slate-700">{unit.unitName}</span>
+        <div className="space-y-4">
+          {/* Mobile cards view */}
+          <div className="md:hidden space-y-3">
+            {units?.map((unit: any) => (
+              <div key={unit._id} className="bg-white dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {unit.images && unit.images.length > 0 ? (
+                      <img 
+                        src={unit.images[0].startsWith("http") ? unit.images[0] : `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/${unit.images[0].replace(/\\/g, "/")}`} 
+                        alt="unit" 
+                        className="w-11 h-11 rounded-xl object-cover bg-slate-100 dark:bg-slate-700 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-300 dark:text-slate-500 shrink-0">
+                        <Grid size={18} />
                       </div>
-                      <div className="flex gap-2 ml-13 pl-13 mt-1">
-                        {unit.bedrooms > 0 && <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">{unit.bedrooms} বেড</span>}
-                        {unit.bathrooms > 0 && <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">{unit.bathrooms} বাথ</span>}
-                        {unit.balcony > 0 && <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">{unit.balcony} বারান্দা</span>}
-                        {unit.kitchen > 0 && <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">{unit.kitchen} কিচেন</span>}
-                      </div>
+                    )}
+                    <div>
+                      <h4 className="font-black text-sm text-slate-800 dark:text-slate-100">{unit.unitName}</h4>
+                      <p className="text-xs text-slate-400 font-bold">{unit.floor} তলা</p>
                     </div>
-                  </td>
-                  <td className="p-5 text-sm text-slate-500 tracking-tighter">{unit.floor} তলা</td>
-                  <td className="p-5 font-bold text-slate-800">৳ {unit.rent?.toLocaleString()}</td>
-                  <td className="p-5">
-                     <span className={`px-3 py-1 text-[10px] font-black rounded-full uppercase ${unit.status === 'খালি' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
-                       {unit.status}
-                     </span>
-                  </td>
-                  <td className="p-5 text-right">
-                     <div className="flex justify-end gap-2">
-                       {unit.status === "খালি" ? (
-                         <button
-                           onClick={() => { setSelectedUnit(unit); setAssignModalOpen(true); }}
-                           className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-black hover:bg-emerald-500 hover:text-white transition-all"
-                         >
-                           <UserPlus size={13} /> ভাড়া দিন
-                         </button>
-                       ) : (
-                         <div className="flex items-center gap-2">
-                           <button
-                             onClick={() => { setSelectedUnit(unit); setTenantDetailOpen(true); }}
-                             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-black hover:bg-blue-500 hover:text-white transition-all"
-                           >
-                             <Users size={13} /> ভাড়াটিয়া দেখুন
-                           </button>
-                           <button
-                             onClick={() => { setSelectedUnit(unit); setBillModalOpen(true); }}
-                             className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-xl text-xs font-black hover:bg-orange-500 hover:text-white transition-all"
-                             title="বিল তৈরি"
-                           >
-                             <PlusCircle size={13} /> বিল তৈরি
-                           </button>
-                         </div>
-                       )}
-                       <button 
-                           onClick={() => { setSelectedUnit(unit); setIsEditUnitModalOpen(true); }}
-                           className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-xl transition-all" 
-                           title="Edit Unit"
-                        >
-                           <Edit3 size={14} />
-                        </button>
-                       <button 
-                           onClick={() => { setUnitToDelete(unit); setDeleteModalOpen(true); }}
-                           className="p-1.5 text-red-400 hover:bg-red-50 rounded-xl transition-all" 
-                           title="Delete Unit"
-                        >
-                           <Trash2 size={14} />
-                        </button>
-                     </div>
-                  </td>
+                  </div>
+                  <span className={`px-2.5 py-1 text-[10px] font-black rounded-full uppercase ${unit.status === 'খালি' ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
+                    {unit.status}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-y border-slate-100 dark:border-slate-700/50">
+                  <span className="text-xs text-slate-400 font-bold">মাসিক ভাড়া:</span>
+                  <span className="text-sm font-black text-primary">৳ {unit.rent?.toLocaleString()}</span>
+                </div>
+
+                {/* Amenities Badges */}
+                <div className="flex flex-wrap gap-1.5">
+                  {unit.bedrooms > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md font-bold">{unit.bedrooms} বেড</span>}
+                  {unit.bathrooms > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md font-bold">{unit.bathrooms} বাথ</span>}
+                  {unit.balcony > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md font-bold">{unit.balcony} বারান্দা</span>}
+                  {unit.kitchen > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md font-bold">{unit.kitchen} কিচেন</span>}
+                </div>
+
+                {/* Actions row on mobile */}
+                <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-50 dark:border-slate-700/40">
+                  {unit.status === "খালি" ? (
+                    <button
+                      onClick={() => { setSelectedUnit(unit); setAssignModalOpen(true); }}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black shadow-sm"
+                    >
+                      <UserPlus size={14} /> ভাড়া দিন
+                    </button>
+                  ) : (
+                    <div className="flex-1 flex items-center gap-2">
+                      <button
+                        onClick={() => { setSelectedUnit(unit); setTenantDetailOpen(true); }}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-black"
+                      >
+                        <Users size={14} /> ভাড়াটিয়া
+                      </button>
+                      <button
+                        onClick={() => { setSelectedUnit(unit); setBillModalOpen(true); }}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl text-xs font-black"
+                      >
+                        <PlusCircle size={14} /> বিল তৈরি
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button 
+                      onClick={() => { setSelectedUnit(unit); setIsEditUnitModalOpen(true); }}
+                      className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all" 
+                      title="Edit Unit"
+                    >
+                      <Edit3 size={15} />
+                    </button>
+                    <button 
+                      onClick={() => { setUnitToDelete(unit); setDeleteModalOpen(true); }}
+                      className="p-2 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" 
+                      title="Delete Unit"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse whitespace-nowrap min-w-[800px]">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+                  <th className="p-5 text-xs font-black text-slate-400 uppercase">ইউনিট</th>
+                  <th className="p-5 text-xs font-black text-slate-400 uppercase">তলা</th>
+                  <th className="p-5 text-xs font-black text-slate-400 uppercase">ভাড়া</th>
+                  <th className="p-5 text-xs font-black text-slate-400 uppercase">অবস্থা</th>
+                  <th className="p-5 text-xs font-black text-slate-400 uppercase text-right">অ্যাকশন</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                {units?.map((unit: any) => (
+                  <tr key={unit._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-all group">
+                    <td className="p-5">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-3">
+                          {unit.images && unit.images.length > 0 ? (
+                            <img 
+                              src={unit.images[0].startsWith("http") ? unit.images[0] : `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/${unit.images[0].replace(/\\/g, "/")}`} 
+                              alt="unit" 
+                              className="w-10 h-10 rounded-lg object-cover bg-slate-100 dark:bg-slate-800"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-600">
+                              <Grid size={16} />
+                            </div>
+                          )}
+                          <span className="font-bold text-slate-700 dark:text-slate-200">{unit.unitName}</span>
+                        </div>
+                        <div className="flex gap-2 ml-13 pl-13 mt-1">
+                          {unit.bedrooms > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md font-bold">{unit.bedrooms} বেড</span>}
+                          {unit.bathrooms > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md font-bold">{unit.bathrooms} বাথ</span>}
+                          {unit.balcony > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md font-bold">{unit.balcony} বারান্দা</span>}
+                          {unit.kitchen > 0 && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md font-bold">{unit.kitchen} কিচেন</span>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-5 text-sm text-slate-500 dark:text-slate-400 tracking-tighter">{unit.floor} তলা</td>
+                    <td className="p-5 font-bold text-slate-800 dark:text-slate-100">৳ {unit.rent?.toLocaleString()}</td>
+                    <td className="p-5">
+                       <span className={`px-3 py-1 text-[10px] font-black rounded-full uppercase ${unit.status === 'খালি' ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
+                         {unit.status}
+                       </span>
+                    </td>
+                    <td className="p-5 text-right">
+                       <div className="flex justify-end gap-2">
+                         {unit.status === "খালি" ? (
+                           <button
+                             onClick={() => { setSelectedUnit(unit); setAssignModalOpen(true); }}
+                             className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-xl text-xs font-black hover:bg-emerald-500 hover:text-white transition-all"
+                           >
+                             <UserPlus size={13} /> ভাড়া দিন
+                           </button>
+                         ) : (
+                           <div className="flex items-center gap-2">
+                             <button
+                               onClick={() => { setSelectedUnit(unit); setTenantDetailOpen(true); }}
+                               className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-black hover:bg-blue-500 hover:text-white transition-all"
+                             >
+                               <Users size={13} /> ভাড়াটিয়া দেখুন
+                             </button>
+                             <button
+                               onClick={() => { setSelectedUnit(unit); setBillModalOpen(true); }}
+                               className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl text-xs font-black hover:bg-orange-500 hover:text-white transition-all"
+                               title="বিল তৈরি"
+                             >
+                               <PlusCircle size={13} /> বিল তৈরি
+                             </button>
+                           </div>
+                         )}
+                         <button 
+                             onClick={() => { setSelectedUnit(unit); setIsEditUnitModalOpen(true); }}
+                             className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all" 
+                             title="Edit Unit"
+                          >
+                             <Edit3 size={14} />
+                          </button>
+                         <button 
+                             onClick={() => { setUnitToDelete(unit); setDeleteModalOpen(true); }}
+                             className="p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" 
+                             title="Delete Unit"
+                          >
+                             <Trash2 size={14} />
+                          </button>
+                       </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
           </div>
         </div>
       )}

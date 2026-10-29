@@ -70,7 +70,7 @@ const Navbar = () => {
         ? "bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 py-3 shadow-sm" 
         : "bg-transparent py-5"
     }`}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
@@ -99,7 +99,7 @@ const Navbar = () => {
         </div>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
@@ -128,7 +128,7 @@ const Navbar = () => {
               {dropdownOpen && (
                 <div 
                   onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the dropdown
-                  className="absolute right-0 mt-3 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-4 transition-all duration-300 z-[110] animate-in fade-in slide-in-from-top-2"
+                  className="absolute right-0 mt-3 w-64 max-w-[calc(100vw-2rem)] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-4 transition-all duration-300 z-[110] animate-in fade-in slide-in-from-top-2"
                 >
                   {/* User info header */}
                   <div className="pb-3 border-b border-slate-100 dark:border-slate-800 mb-2">
@@ -174,11 +174,11 @@ const Navbar = () => {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login" className="px-5 py-2.5 text-sm font-bold text-on-surface hover:text-primary transition-colors">লগইন</Link>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Link to="/login" className="px-3 sm:px-5 py-2 text-xs sm:text-sm font-bold text-on-surface hover:text-primary transition-colors">লগইন</Link>
               <Link 
                 to="/register" 
-                className="px-6 py-2.5 bg-primary text-white font-bold rounded-full text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
+                className="hidden sm:inline-flex px-5 sm:px-6 py-2 sm:py-2.5 bg-primary text-white font-bold rounded-full text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
               >
                 ফ্রি শুরু করুন
               </Link>
@@ -198,7 +198,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Panel */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-4 animate-in fade-in slide-in-from-top-4 z-[90]">
+        <div className="md:hidden absolute top-full left-0 right-0 max-h-[calc(100vh-5rem)] overflow-y-auto bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-4 animate-in fade-in slide-in-from-top-4 z-[90]">
           <div className="flex flex-col gap-2">
             <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-base font-bold text-slate-700 dark:text-slate-200 hover:text-primary transition-colors py-2.5 border-b border-slate-100 dark:border-slate-900">হোম</Link>
             <Link to="/search" onClick={() => setMobileMenuOpen(false)} className="text-base font-bold text-slate-700 dark:text-slate-200 hover:text-primary transition-colors py-2.5 border-b border-slate-100 dark:border-slate-900">বাসা খুঁজুন</Link>

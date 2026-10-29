@@ -5,10 +5,11 @@ import { useConfirmStore } from "../store/useConfirmStore";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
-import EditPropertyModal from "@/components/modals/EditPropertyModal";
 import { Edit3, Trash2, Share2 } from "lucide-react";
 import { PropertiesGridSkeleton } from "@/components/ui/SkeletonLoaders";
 import EmptyState from "@/components/ui/EmptyState";
+import { getImageUrl } from "@/lib/axiosInstance";
+import type { Property } from "@/types";
 
 const Properties = () => {
   // ২. হুক থেকে প্রপার্টি লিস্ট এবং লোডিং স্টেট নিয়ে আসা
@@ -18,7 +19,7 @@ const Properties = () => {
   const { openAddPropertyModal } = useUIStore();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null); // কোন কার্ডের মেনু খোলা
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   // ৪. শেয়ার ফাংশন (লিঙ্ক কপি করা)
   const handleShare = (propertyId: string) => {
@@ -73,13 +74,7 @@ const Properties = () => {
             {/* ছবির সেকশন */}
             <div className="relative h-56 overflow-hidden">
               <img
-                src={
-                  property.images && property.images.length > 0
-                    ? property.images[0].startsWith("http")
-                      ? property.images[0]
-                      : `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/${property.images[0].replace(/\\/g, "/")}`
-                    : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6"
-                }
+                src={property.images?.[0] ? getImageUrl(property.images[0]) : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6"}
                 alt={property.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />

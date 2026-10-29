@@ -142,7 +142,7 @@ const Login = () => {
   return (
     <div className="bg-surface font-body text-on-surface min-h-screen flex flex-col">
       <SEOHead {...PAGE_SEO.login} />
-      <main className="flex-grow flex h-screen overflow-hidden">
+      <main className="flex-grow flex min-h-screen lg:h-screen lg:overflow-hidden">
         {/* Left Side: Visual/Branding (Sync with Register) */}
         <div className="hidden lg:flex lg:w-1/2 relative bg-surface-container overflow-hidden items-center justify-center p-12">
           <div className="absolute inset-0 z-0 select-none">
@@ -187,26 +187,26 @@ const Login = () => {
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="w-full lg:w-1/2 bg-surface-container-high flex items-center justify-center p-8 overflow-y-auto">
-          <div className="w-full max-w-md space-y-10">
-            <div className="space-y-3">
-              <h2 className="font-headline text-4xl font-bold text-on-surface">
+        <div className="w-full lg:w-1/2 bg-surface-container-high flex items-center justify-center p-4 sm:p-8 md:p-12 overflow-y-auto">
+          <div className="w-full max-w-md space-y-6 sm:space-y-8 my-auto">
+            <div className="space-y-2">
+              <h2 className="font-headline text-2xl sm:text-4xl font-bold text-on-surface">
                 লগইন করুন
               </h2>
-              <p className="text-on-surface-variant font-medium">
+              <p className="text-on-surface-variant font-medium text-xs sm:text-sm">
                 আপনার সঠিক তথ্য দিয়ে পোর্টালে প্রবেশ করুন।
               </p>
             </div>
 
             {/* Role Switcher */}
-            <div className="p-1.5 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex border border-gray-300/50 shadow-inner overflow-hidden">
+            <div className="p-1 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-800 dark:to-slate-700 rounded-2xl flex border border-gray-300/50 dark:border-slate-600/50 shadow-inner overflow-hidden">
               <button
                 type="button"
                 onClick={() => setRole("landlord")}
-                className={`flex-1 py-3.5 text-center rounded-xl font-bold transition-all duration-300 ${
+                className={`flex-1 py-2.5 sm:py-3 text-center rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 cursor-pointer ${
                   role === "landlord"
-                    ? "bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-xl"
-                    : "text-gray-500 hover:text-gray-800"
+                    ? "bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg"
+                    : "text-gray-500 hover:text-gray-800 dark:text-slate-400 dark:hover:text-slate-100"
                 }`}
               >
                 বাড়িওয়ালা (Landlord)
@@ -214,10 +214,10 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setRole("tenant")}
-                className={`flex-1 py-3.5 text-center rounded-xl font-bold transition-all duration-300 ${
+                className={`flex-1 py-2.5 sm:py-3 text-center rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 cursor-pointer ${
                   role === "tenant"
-                    ? "bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-xl"
-                    : "text-gray-500 hover:text-gray-800"
+                    ? "bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg"
+                    : "text-gray-500 hover:text-gray-800 dark:text-slate-400 dark:hover:text-slate-100"
                 }`}
               >
                 ভাড়াটিয়া (Tenant)

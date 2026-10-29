@@ -180,7 +180,7 @@ const SearchResults = () => {
     : `BariBhara-তে ${total}টি বাসা/ফ্ল্যাট উপলব্ধ। আপনার বাজেট ও পছন্দ অনুযায়ী খুঁজুন।`;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 pb-16">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 sm:pt-28 lg:pt-32 pb-16">
       <SEOHead
         title={location ? `"${location}" এলাকায় বাসা খুঁজুন` : "বাসা খুঁজুন"}
         description={searchDesc}
@@ -193,16 +193,15 @@ const SearchResults = () => {
       />
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
-
-          <h1 className="text-3xl font-black text-on-surface">বাসা খুঁজুন</h1>
-          <p className="text-on-surface-variant mt-1">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-black text-on-surface">বাসা খুঁজুন</h1>
+          <p className="text-on-surface-variant text-xs sm:text-sm mt-1">
             {isLoading ? "লোড হচ্ছে..." : `${total}টি বাসা পাওয়া গেছে`}
           </p>
         </div>
 
         {/* Search Bar + Filter Toggle */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mb-6">
           <div className="flex-1 relative">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -211,28 +210,30 @@ const SearchResults = () => {
               onChange={(e) => setLocation(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && applyFilters()}
               placeholder="এলাকা, ঠিকানা বা প্রপার্টির নাম লিখুন..."
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-on-surface text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-sm"
+              className="w-full pl-11 pr-4 py-3 sm:py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-on-surface text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-sm"
             />
           </div>
-          <button
-            id="search-filter-btn"
-            onClick={() => setShowFilters((p) => !p)}
-            className={`flex items-center gap-2 px-5 py-3.5 rounded-2xl font-black text-sm shadow-sm border transition-all ${
-              hasActiveFilters
-                ? "bg-primary text-white border-primary"
-                : "bg-white dark:bg-slate-800 text-on-surface border-slate-200 dark:border-slate-700"
-            }`}
-          >
-            <SlidersHorizontal size={16} />
-            ফিল্টার {hasActiveFilters && "•"}
-          </button>
-          <button
-            id="search-submit-btn"
-            onClick={applyFilters}
-            className="px-5 py-3.5 bg-primary text-white rounded-2xl font-black text-sm shadow-sm hover:bg-primary/90 transition-all"
-          >
-            খুঁজুন
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              id="search-filter-btn"
+              onClick={() => setShowFilters((p) => !p)}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl font-black text-xs sm:text-sm shadow-sm border transition-all ${
+                hasActiveFilters
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white dark:bg-slate-800 text-on-surface border-slate-200 dark:border-slate-700"
+              }`}
+            >
+              <SlidersHorizontal size={16} />
+              ফিল্টার {hasActiveFilters && "•"}
+            </button>
+            <button
+              id="search-submit-btn"
+              onClick={applyFilters}
+              className="flex-1 sm:flex-none px-5 py-3 sm:py-3.5 bg-primary text-white rounded-2xl font-black text-xs sm:text-sm shadow-sm hover:bg-primary/90 transition-all text-center"
+            >
+              খুঁজুন
+            </button>
+          </div>
         </div>
 
         {/* Filter Panel */}

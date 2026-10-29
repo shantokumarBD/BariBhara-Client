@@ -1,120 +1,85 @@
-import axios from "axios";
+import { api } from "@/lib/axiosInstance";
+import type { Tenant, ApiResponse } from "@/types";
 
-const BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/tenant`;
+export interface TenantsResponse {
+  tenants: Tenant[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
 
-const getAuthHeader = (token: string) => ({
-  Authorization: token?.startsWith("Bearer ") ? token : `Bearer ${token}`,
-});
-
-// ১. নতুন ভাড়াটিয়া যোগ করা (ছবি সহ FormData)
-export const addTenantApi = async (formData: FormData, token: string) => {
-  const res = await axios.post(`${BASE_URL}/add`, formData, {
-    headers: {
-      ...getAuthHeader(token),
-      "Content-Type": "multipart/form-data",
-    },
+// ১. নতুন ভাড়াটিয়া যোগ করা
+export const addTenantApi = async (formData: FormData) => {
+  const res = await api.post<ApiResponse<Tenant>>("/api/tenant/add", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data;
 };
 
 // ২. সকল ভাড়াটিয়ার তালিকা (Pagination সহ)
-export const getAllTenantsApi = async (token: string, page = 1, limit = 9) => {
-  const res = await axios.get(`${BASE_URL}/all?page=${page}&limit=${limit}`, {
-    headers: getAuthHeader(token),
-  });
-  return res.data; // { tenants, total, page, totalPages }
+export const getAllTenantsApi = async (page = 1, limit = 9) => {
+  const res = await api.get<TenantsResponse>(`/api/tenant/all?page=${page}&limit=${limit}`);
+  return res.data;
 };
 
 // ৩. নির্দিষ্ট ইউনিটের ভাড়াটিয়া
-export const getTenantByUnitApi = async (unitId: string, token: string) => {
-  const res = await axios.get(`${BASE_URL}/unit/${unitId}`, {
-    headers: getAuthHeader(token),
-  });
+export const getTenantByUnitApi = async (unitId: string) => {
+  const res = await api.get<{ tenant: Tenant }>(`/api/tenant/unit/${unitId}`);
   return res.data.tenant;
 };
 
 // ৪. ভাড়াটিয়ার তথ্য আপডেট
-export const updateTenantApi = async (
-  id: string,
-  formData: FormData,
-  token: string
-) => {
-  const res = await axios.put(`${BASE_URL}/${id}`, formData, {
-    headers: {
-      ...getAuthHeader(token),
-      "Content-Type": "multipart/form-data",
-    },
+export const updateTenantApi = async (id: string, formData: FormData) => {
+  const res = await api.put<ApiResponse<Tenant>>(`/api/tenant/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data;
 };
 
 // ৫. ভাড়াটিয়া সরানো (ইউনিট খালি করা)
-export const vacateTenantApi = async (id: string, token: string) => {
-  const res = await axios.patch(`${BASE_URL}/vacate/${id}`, {}, {
-    headers: getAuthHeader(token),
-  });
+export const vacateTenantApi = async (id: string) => {
+  const res = await api.patch<ApiResponse>(`/api/tenant/vacate/${id}`);
   return res.data;
 };
 
 // ৬. Auto Renew টগল করা
-export const toggleAutoRenewApi = async (id: string, autoRenew: boolean, token: string) => {
-  const res = await axios.patch(`${BASE_URL}/${id}/auto-renew`, { autoRenew }, {
-    headers: getAuthHeader(token),
-  });
+export const toggleAutoRenewApi = async (id: string, autoRenew: boolean) => {
+  const res = await api.patch<ApiResponse>(`/api/tenant/auto-renew/${id}`, { autoRenew });
   return res.data;
 };
 
-// ৭. ম্যানুয়াল রিনিউ (মেয়াদ বাড়ানো)
-export const renewLeaseApi = async (id: string, newEndDate: string, token: string) => {
-  const res = await axios.post(`${BASE_URL}/${id}/renew-lease`, { newEndDate }, {
-    headers: getAuthHeader(token),
-  });
+// ৭. লিজ নবায়ন করা
+export const renewLeaseApi = async (id: string, newEndDate: string) => {
+  const res = await api.patch<ApiResponse>(`/api/tenant/renew/${id}`, { newEndDate });
   return res.data;
 };
 
-// ৮. ডিজিটাল চুক্তিপত্র জেনারেট করা
-export const generateAgreementApi = async (id: string, token: string) => {
-  const res = await axios.post(`${BASE_URL}/${id}/generate-agreement`, {}, {
-    headers: getAuthHeader(token),
-  });
+// ৮. চুক্তিপত্র তৈরি
+export const generateAgreementApi = async (id: string) => {
+  const res = await api.post<ApiResponse<{ agreementUrl: string }>>(`/api/tenant/agreement/${id}`);
   return res.data;
 };
 
-// ৯. চুক্তিপত্রে স্বাক্ষর করা (ভাড়াটিয়া পোর্টাল থেকে)
-export const signAgreementApi = async (signatureData: string, token: string) => {
-  const res = await axios.post(`${BASE_URL}/sign-agreement`, { signatureData }, {
-    headers: getAuthHeader(token),
-  });
+// ৯. চুক্তিপত্র মুছে ফেলা
+export const deleteAgreementApi = async (id: string) => {
+  const res = await api.delete<ApiResponse>(`/api/tenant/agreement/${id}`);
   return res.data;
 };
 
-export const deleteAgreementApi = async (id: string, token: string) => {
-  const res = await axios.delete(`${BASE_URL}/${id}/agreement`, {
-    headers: getAuthHeader(token),
-  });
+// ১০. NID ভেরিফিকেশন
+export const verifyNidApi = async (id: string, verified: boolean) => {
+  const res = await api.patch<ApiResponse>(`/api/tenant/verify-nid/${id}`, { verified });
   return res.data;
 };
 
-// ১০. NID ভেরিফাই করা (অ্যাডমিন)
-export const verifyNidApi = async (id: string, status: string, rejectionReason: string, token: string) => {
-  const res = await axios.patch(`${BASE_URL}/${id}/verify-nid`, { status, rejectionReason }, {
-    headers: getAuthHeader(token),
-  });
+// ১১. ইউটিলিটি চার্জেস আপডেট
+export const updateUtilitiesApi = async (id: string, utilities: any) => {
+  const res = await api.patch<ApiResponse>(`/api/tenant/utilities/${id}`, { utilities });
   return res.data;
 };
 
-// ১১. ইউটিলিটি সেটিংস আপডেট করা
-export const updateUtilitiesApi = async (id: string, utilityConfig: any, token: string) => {
-  const res = await axios.patch(`${BASE_URL}/${id}/utilities`, { utilityConfig }, {
-    headers: getAuthHeader(token),
-  });
-  return res.data;
-};
-
-// ১২. রেটিং আপডেট করা
-export const rateTenantApi = async (id: string, ratingData: any, token: string) => {
-  const res = await axios.patch(`${BASE_URL}/${id}/rating`, ratingData, {
-    headers: getAuthHeader(token),
-  });
+// ১২. ভাড়াটিয়ার রেটিং দেওয়া
+export const rateTenantApi = async (id: string, rating: number, review?: string) => {
+  const res = await api.post<ApiResponse>(`/api/tenant/rate/${id}`, { rating, review });
   return res.data;
 };

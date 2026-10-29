@@ -1,55 +1,68 @@
-import { StrictMode } from "react";
+import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { HelmetProvider } from "react-helmet-async";
-
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import Home from "./components/Home.tsx";
 import { Toaster } from "sonner";
 import ConfirmModal from "./components/modals/ConfirmModal";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import Login from "./pages/Login.tsx";
-import Register from "./pages/Register.tsx";
-import ErrorPage from "./pages/ErrorPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
-import Dashboard from "./pages/Dashboard.tsx";
 import PublicRoute from "./components/PublicRoute.tsx";
-import MainLayout from "./components/layout/MainLayout.tsx";
-import Properties from "./pages/Properties";
-import PropertyDetails from "./pages/PropertyDetails.tsx";
-import Tenants from "./pages/Tenants.tsx";
-import RentManagement from "./pages/RentManagement";
-import Maintenance from "./pages/Maintenance";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import Reviews from "./pages/Reviews.tsx";
-import ForgotPassword from "./pages/ForgotPassword.tsx";
-import ResetPassword from "./pages/ResetPassword.tsx";
-import PaymentPage from "./pages/PaymentPage.tsx";
-import AdminSubscriptions from "./pages/AdminSubscriptions.tsx";
-import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
-import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminProtectedRoute from "./components/AdminProtectedRoute.tsx";
-import SearchResults from "./pages/SearchResults";
-import PublicPropertyDetail from "./pages/PublicPropertyDetail";
-import AdminRevenue from "./pages/admin/AdminRevenue.tsx";
-import AdminAnalytics from "./pages/admin/AdminAnalytics.tsx";
-import AdminPlans from "./pages/admin/AdminPlans.tsx";
-import TermsPrivacy from "./pages/TermsPrivacy";
-import SavedProperties from "./pages/SavedProperties";
-// Tenant Portal Components
-import TenantProtectedRoute from "./components/TenantProtectedRoute";
-import TenantLogin from "./pages/tenant/TenantLogin";
-import TenantLayout from "./components/layout/TenantLayout";
-import TenantDashboard from "./pages/tenant/TenantDashboard";
-import TenantInvoices from "./pages/tenant/TenantInvoices";
-import TenantMaintenance from "./pages/tenant/TenantMaintenance";
-import TenantAgreement from "./pages/tenant/TenantAgreement";
-import TenantProfile from "./pages/tenant/TenantProfile";
+import TenantProtectedRoute from "./components/TenantProtectedRoute.tsx";
+import MainLayout from "./components/layout/MainLayout.tsx";
+import TenantLayout from "./components/layout/TenantLayout.tsx";
+import ErrorPage from "./pages/ErrorPage.tsx";
+import PageLoader from "./components/common/PageLoader";
+
+// Lazy Loaded Pages for high-performance code splitting
+const Home = lazy(() => import("./components/Home.tsx"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
+const PublicPropertyDetail = lazy(() => import("./pages/PublicPropertyDetail"));
+const SavedProperties = lazy(() => import("./pages/SavedProperties"));
+const TermsPrivacy = lazy(() => import("./pages/TermsPrivacy"));
+const Register = lazy(() => import("./pages/Register.tsx"));
+const Login = lazy(() => import("./pages/Login.tsx"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword.tsx"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
+
+// Landlord Pages
+const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+const Properties = lazy(() => import("./pages/Properties"));
+const PropertyDetails = lazy(() => import("./pages/PropertyDetails.tsx"));
+const Tenants = lazy(() => import("./pages/Tenants.tsx"));
+const RentManagement = lazy(() => import("./pages/RentManagement"));
+const Maintenance = lazy(() => import("./pages/Maintenance"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Reviews = lazy(() => import("./pages/Reviews.tsx"));
+const PaymentPage = lazy(() => import("./pages/PaymentPage.tsx"));
+
+// Admin Pages
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.tsx"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers.tsx"));
+const AdminSubscriptions = lazy(() => import("./pages/AdminSubscriptions.tsx"));
+const AdminRevenue = lazy(() => import("./pages/admin/AdminRevenue.tsx"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics.tsx"));
+const AdminPlans = lazy(() => import("./pages/admin/AdminPlans.tsx"));
+
+// Tenant Pages
+const TenantDashboard = lazy(() => import("./pages/tenant/TenantDashboard"));
+const TenantInvoices = lazy(() => import("./pages/tenant/TenantInvoices"));
+const TenantMaintenance = lazy(() => import("./pages/tenant/TenantMaintenance"));
+const TenantAgreement = lazy(() => import("./pages/tenant/TenantAgreement"));
+const TenantProfile = lazy(() => import("./pages/tenant/TenantProfile"));
 
 const queryClient = new QueryClient();
+
+// Helper to wrap lazy loaded component with Suspense
+const load = (Component: React.LazyExoticComponent<any>) => (
+  <Suspense fallback={<PageLoader />}>
+    <Component />
+  </Suspense>
+);
 
 const router = createBrowserRouter([
   // ১. পাবলিক রাউট (হোমপেজ, লগইন, রেজিস্ট্রেশন)
@@ -60,41 +73,41 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: load(Home),
       },
       {
         path: "search",
-        element: <SearchResults />,
+        element: load(SearchResults),
       },
       {
         path: "property/:id",
-        element: <PublicPropertyDetail />,
+        element: load(PublicPropertyDetail),
       },
       {
         path: "saved-properties",
-        element: <SavedProperties />,
+        element: load(SavedProperties),
       },
       {
         path: "terms-privacy",
-        element: <TermsPrivacy />,
+        element: load(TermsPrivacy),
       },
     ],
   },
   {
     path: "/register",
-    element: <PublicRoute><Register /></PublicRoute>,
+    element: <PublicRoute>{load(Register)}</PublicRoute>,
   },
   {
     path: "/login",
-    element: <PublicRoute><Login /></PublicRoute>,
+    element: <PublicRoute>{load(Login)}</PublicRoute>,
   },
   {
     path: "/forgot-password",
-    element: <PublicRoute><ForgotPassword /></PublicRoute>,
+    element: <PublicRoute>{load(ForgotPassword)}</PublicRoute>,
   },
   {
     path: "/reset-password",
-    element: <PublicRoute><ResetPassword /></PublicRoute>,
+    element: <PublicRoute>{load(ResetPassword)}</PublicRoute>,
   },
 
   // ২. ল্যান্ডলর্ড প্রোটেক্টেড রাউট
@@ -108,39 +121,39 @@ const router = createBrowserRouter([
     children: [
       {
         path: "dashboard",
-        element: <Dashboard />,
+        element: load(Dashboard),
       },
       {
         path: "properties",
-        element: <Properties />,
+        element: load(Properties),
       },
       {
         path: "properties/:id",
-        element: <PropertyDetails />,
+        element: load(PropertyDetails),
       },
       {
         path: "tenants",
-        element: <Tenants />,
+        element: load(Tenants),
       },
       {
         path: "payments",
-        element: <RentManagement />,
+        element: load(RentManagement),
       },
       {
         path: "settings",
-        element: <Settings />,
+        element: load(Settings),
       },
       {
         path: "reviews",
-        element: <Reviews />,
+        element: load(Reviews),
       },
       {
         path: "maintenance",
-        element: <Maintenance />,
+        element: load(Maintenance),
       },
       {
         path: "reports",
-        element: <Reports />,
+        element: load(Reports),
       },
     ],
   },
@@ -148,7 +161,7 @@ const router = createBrowserRouter([
     path: "/payment/:plan",
     element: (
       <ProtectedRoute>
-        <PaymentPage />
+        {load(PaymentPage)}
       </ProtectedRoute>
     ),
   },
@@ -168,31 +181,32 @@ const router = createBrowserRouter([
       },
       {
         path: "dashboard",
-        element: <AdminDashboard />,
+        element: load(AdminDashboard),
       },
       {
         path: "users",
-        element: <AdminUsers />,
+        element: load(AdminUsers),
       },
       {
         path: "subscriptions",
-        element: <AdminSubscriptions />,
+        element: load(AdminSubscriptions),
       },
       {
         path: "revenue",
-        element: <AdminRevenue />,
+        element: load(AdminRevenue),
       },
       {
         path: "analytics",
-        element: <AdminAnalytics />,
+        element: load(AdminAnalytics),
       },
       {
         path: "plans",
-        element: <AdminPlans />,
+        element: load(AdminPlans),
       },
     ],
   },
 
+  // ৪. টেন্যান্ট রাউট
   {
     path: "/tenant",
     element: (
@@ -207,23 +221,23 @@ const router = createBrowserRouter([
       },
       {
         path: "dashboard",
-        element: <TenantDashboard />,
+        element: load(TenantDashboard),
       },
       {
         path: "invoices",
-        element: <TenantInvoices />,
+        element: load(TenantInvoices),
       },
       {
         path: "maintenance",
-        element: <TenantMaintenance />,
+        element: load(TenantMaintenance),
       },
       {
         path: "agreement",
-        element: <TenantAgreement />,
+        element: load(TenantAgreement),
       },
       {
         path: "profile",
-        element: <TenantProfile />,
+        element: load(TenantProfile),
       },
     ],
   },

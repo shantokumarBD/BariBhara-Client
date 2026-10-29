@@ -80,11 +80,11 @@ const Topbar = () => {
   }, []);
 
   return (
-    <header className="fixed top-0 right-0 lg:w-[calc(100%-18rem)] md:w-[calc(100%-6rem)] w-full h-20 z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-between lg:px-8 px-4 border-b border-slate-200 dark:border-slate-800">
+    <header className="fixed top-0 right-0 lg:w-[calc(100%-18rem)] md:w-[calc(100%-6rem)] w-full h-20 z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-between px-3 sm:px-6 lg:px-8 border-b border-slate-200 dark:border-slate-800 gap-2">
       {/* সার্চ বার */}
-      <div ref={searchRef} className="relative lg:w-96 w-40 md:w-64">
-        <div className="flex items-center bg-surface-container-lowest rounded-full px-4 py-2 shadow-sm border border-slate-200 dark:border-slate-700 transition-all">
-          <Search size={18} className="text-on-surface-variant shrink-0" />
+      <div ref={searchRef} className="relative flex-1 max-w-[190px] sm:max-w-xs lg:w-96">
+        <div className="flex items-center bg-surface-container-lowest rounded-full px-3 sm:px-4 py-2 shadow-sm border border-slate-200 dark:border-slate-700 transition-all">
+          <Search size={16} className="text-on-surface-variant shrink-0" />
           <input
             className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-on-surface-variant/60 ml-2 text-on-surface outline-none"
             placeholder="টেনেন্ট, প্রপার্টি খুঁজুন..."
@@ -170,11 +170,11 @@ const Topbar = () => {
           </span>
         </button>
 
-        {/* 🌐 Language Toggle */}
+        {/* 🌐 Language Toggle (Hidden on very small screens to avoid crowding) */}
         <button
           onClick={() => setLanguage(language === "bn" ? "en" : "bn")}
           title={language === "bn" ? "Switch to English" : "বাংলায় পরিবর্তন করুন"}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-lowest rounded-full border border-slate-200 dark:border-slate-700 shadow-sm hover:scale-105 transition-all"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-lowest rounded-full border border-slate-200 dark:border-slate-700 shadow-sm hover:scale-105 transition-all"
         >
           <Languages size={14} className="text-on-surface-variant" />
           <span className="text-xs font-black text-on-surface">

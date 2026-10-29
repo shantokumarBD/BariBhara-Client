@@ -21,14 +21,14 @@ const ActivityTable = () => {
   };
 
   return (
-    <div className="bg-surface-container-lowest p-10 rounded-[3rem] shadow-sm border border-slate-200 dark:border-slate-800">
-      <div className="flex justify-between items-center mb-10">
-        <h3 className="text-2xl font-bold font-headline text-on-surface">সাম্প্রতিক লেনদেন</h3>
+    <div className="bg-surface-container-lowest p-4 sm:p-7 lg:p-10 rounded-2xl sm:rounded-[2.5rem] lg:rounded-[3rem] shadow-sm border border-slate-200 dark:border-slate-800">
+      <div className="flex justify-between items-center mb-6 sm:mb-10">
+        <h3 className="text-lg sm:text-2xl font-bold font-headline text-on-surface">সাম্প্রতিক লেনদেন</h3>
         <Link
           to="/payments"
-          className="text-primary font-bold text-sm flex items-center gap-1 hover:underline font-body"
+          className="text-primary font-bold text-xs sm:text-sm flex items-center gap-1 hover:underline font-body"
         >
-          সব দেখুন <ArrowRight size={16} />
+          সব দেখুন <ArrowRight size={15} />
         </Link>
       </div>
 
