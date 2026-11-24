@@ -10,7 +10,6 @@
 
 > **A next-generation, cloud-native rental ecosystem bridging Landlords, Tenants, and Super Administrators with automated billing, transparent security deposit settlements, mobile-first responsive design, and SaaS subscription tiers.**
 
----
 
 ## 📌 Executive Summary & Core Purpose
 
